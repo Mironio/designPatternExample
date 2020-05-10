@@ -1,41 +1,42 @@
 //Swapnil_tripathi
-//Creational Design Pattern  
+//Creational Design Pattern
 
 // Factory Design
 
 class Person {
- constructor(name='unnamed person')  {
-  this.name = name;
- }
+    constructor(name='unnamed person')  {
+        this.name = name;
+    }
 }
 
 class Shopper extends Person {
-  constructor(name, money=0) {
-    super(name);
-    this.money = money;
-    this.employed = false;
-  }
+    constructor(name, money=0) {
+        super(name);
+        this.money = money;
+        this.employed = false;
+    }
 }
 
 class Employee extends Shopper {
-  constructor(name, money=0, employer='') {
-    super(name, money);
-    this.employerName = employer;
-    this.employed = true;
-  }
- }
+    constructor(name, money=0, employer='') {
+        super(name, money);
+        this.employerName = employer;
+        this.employed = true;
+    }
+}
 
 class PersonFactory {
-  constructor(type, name, money=0) {
-    switch (type) {
-      case 'Employee': 
-        return new Employee(name, money);
-      case 'Shopper':
-        return new Shopper(name, money);
-      case 'Person':
-        return new Person(name);
+    constructor(type, name, money=0) {
+        switch (type) {
+            case 'Employee':
+                return new Employee(name, money);
+            case 'Shopper':
+                return new Shopper(name, money);
+            case 'Person':
+                return new Person(name);
+                // it'd be better to have a default case for unsupported types and throw an Error
+        }
     }
-  }
 }
 console.log(new PersonFactory('Shopper','Swapnil',100));
 
@@ -45,72 +46,92 @@ console.log(new PersonFactory('Shopper','Swapnil',100));
 
 class OldCalculator {
     constructor() {
-      this.operations = function(term1, term2, operation) {
-        switch (operation) {
-          case 'add':
-            return { res: term1 + term2 };
-          case 'sub':
-            return { res: term1 - term2 };
-          default:
-            return NaN;
-         }
-      };
+        this.operations = function(term1, term2, operation) {
+            switch (operation) {
+                case 'add':
+                    return { res: term1 + term2 }; // // we can simplify this part and return just number
+                case 'sub':
+                    return { res: term1 - term2 }; // we can simplify this part and return just number
+                default:
+                    return NaN;
+            }
+        };
     }
-  }
-      
-  class NewCalculator {
+}
+
+class NewCalculator {
     constructor() {
-      this.multiply = function(term1, term2) {
-        return term1 * term2;
-      };
-      this.divide = function(term1, term2) {
-        return term1 / term2;
-      };
+        this.multiply = function(term1, term2) {
+            return term1 * term2;
+        };
+        this.divide = function(term1, term2) {
+            return term1 / term2;
+        };
     }
-  }
+}
+
+// Good. Traditionally we tend to move functions in constructor to methods like this:
+/*
+class NewCalculator {
+    multiply(num1, num2) {
+        return num1 * num2;
+    }
+    divide(num1, num2) {
+        return num1 / num2;
+    }
+}
+*/
+// Another alternative.
+/*
+class NewCalculator {
+    multiply = (num1, num2) => num1 * num2;
+    divide = (num1, num2) => num1 / num2;
+}
+*/
 
 const OPERATION = {
-  MULTIPLY: 'multiply',
-  DIVIDE: 'divide',
-  ADD: 'add',
-  SUBSTRACT: 'sub',
+    MULTIPLY: 'multiply',
+    DIVIDE: 'divide',
+    ADD: 'add',
+    SUBSTRACT: 'sub',
 };
 
-// (B) Facade Pattern 
+// (B) Facade Pattern
 class UltimateCalculator {
-  constructor() {
-    this.calculator = Object.assign(new NewCalculator(), new OldCalculator());
-  }
-
-  calculate(first, second, operation) {
-    switch (operation) {
-      case OPERATION.MULTIPLY:
-        return this.calculator.multiply(first, second);
-      case OPERATION.DIVIDE:
-        return this.calculator.divide(first, second);
-      case OPERATION.ADD:
-      case OPERATION.SUBSTRACT:
-        return this.calculator.operations(first, second, operation).res;
-      default:
-        return this.calculator.operations(first, second, operation);
+    constructor() {
+        this.calculator = Object.assign(new NewCalculator(), new OldCalculator());
+        // Good. But can be risky. What if NewCalculator and OldCalculator have methods with the same names?
     }
-  }
 
-  add(first, second) {
-    return this.calculate(first, second, OPERATION.ADD);
-  }
-  
-  sub(first, second) {
-    return this.calculate(first, second, OPERATION.SUBSTRACT);
-  }
+    calculate(first, second, operation) {
+        switch (operation) {
+            case OPERATION.MULTIPLY:
+                return this.calculator.multiply(first, second);
+            case OPERATION.DIVIDE:
+                return this.calculator.divide(first, second);
+            case OPERATION.ADD:
+            case OPERATION.SUBSTRACT:
+                return this.calculator.operations(first, second, operation).res;
+            default:
+                return this.calculator.operations(first, second, operation);
+        }
+    }
 
-  multiply(first, second) {
-    return this.calculate(first, second, OPERATION.MULTIPLY);
-  }
+    add(first, second) {
+        return this.calculate(first, second, OPERATION.ADD);
+    }
 
-  divide(first, second) {
-    return this.calculate(first, second, OPERATION.DIVIDE);
-  }
+    sub(first, second) {
+        return this.calculate(first, second, OPERATION.SUBSTRACT);
+    }
+
+    multiply(first, second) {
+        return this.calculate(first, second, OPERATION.MULTIPLY);
+    }
+
+    divide(first, second) {
+        return this.calculate(first, second, OPERATION.DIVIDE);
+    }
 }
 
 // clever calculator
@@ -119,45 +140,48 @@ class UltimateCalculator {
 // (C) Decorator Pattern
 class CleverCalculator extends UltimateCalculator {
 
-  constructor() {
-    super();
-    this.state = {};
-  }
-
-  operations(first, second, operation) {
-    
-    const key = `${first}${operation}${second}`;
-    let value = this.state[key];
-
-    if (value) {
-      return value;
+    constructor() {
+        super();
+        this.state = {};
     }
 
-    value = super.calculate(first, second, operation);
-    this.state[key] = value;
-    return value;
-  }
+    operations(first, second, operation) {
+
+        const key = `${first}${operation}${second}`;
+        let value = this.state[key];
+
+        if (value) {
+            return value;
+        }
+
+        value = super.calculate(first, second, operation);
+        this.state[key] = value;
+        return value;
+    }
 }
-// (D) 
+// (D)
 
 
 class LoggerCalculator extends CleverCalculator {
 
-  constructor() {
-     super();
-   }
- 
-   operations(first, second, operation) {
-     console.log('Input: ' , first, second, operation);
-     const output = super.operations(first, second, operation);
-     console.log('Output: ' , output);
-     return output;
-   }
- 
- }
- 
- var a = new LoggerCalculator();
- a.operations(10,10,'add');
+    // we can omit constructor and super. Inheritance will be done automatically :)
+    constructor() {
+        super();
+    }
+
+
+    operations(first, second, operation) {
+        console.log('Input: ' , first, second, operation);
+        const output = super.operations(first, second, operation);
+        console.log('Output: ' , output);
+        return output;
+    }
+
+}
+
+var a = new LoggerCalculator();
+// const a = new LoggerCalculator();
+a.operations(10,10,'add');
 
 //------------------------------------------------------------------------------
 
@@ -166,58 +190,93 @@ class LoggerCalculator extends CleverCalculator {
 // (A) Chain of Responsibility Pattern
 class CumulativeSum {
     constructor() {
-      this.sum = 0;
+        this.sum = 0;
     }
-  
+
     add(input) {
-      this.sum += input;
-      return this;
+        this.sum += input;
+        return this;
     }
-  }
+}
 
-  const sum1 = new CumulativeSum();
-  console.log(sum1.add(10).add(2).add(50).sum);
+const sum1 = new CumulativeSum();
+console.log(sum1.add(10).add(2).add(50).sum);
 
-  // (B) Command Pattern
+// (B) Command Pattern
 
 class Command {
     constructor(instance) {
-      this.instance = instance;
-      this.commandsExecuted = [];
+        this.instance = instance;
+        this.commandsExecuted = [];
     }
-  
+
     execute(command) {
-      this.commandsExecuted.push(command);
-      return this.instance[command]();
+        this.commandsExecuted.push(command);
+        return this.instance[command]();
+
+        /* A little bit more robust solution:
+
+        if (operation && this.specialMath[operation]) {
+            this.commandsExecuted.push(operation);
+            this.specialMath[operation]();
+        } else {
+            console.warn(`${operation} is not supported` )
+        }
+
+        */
+        
     }
-  }
+}
 // C Oberver pattern
 
 class ObserverClass {
-  constructor() {
-    this.observers = [];
-    this.items = [];
-  }
+    constructor() {
+        this.observers = [];
+        this.items = [];
+    }
 
-  subscribe(funct) {
-    this.observers.push(funct);
-  }
+    subscribe(funct) {
+        this.observers.push(funct);
+    }
+    
+    // unsubscription is nice to have
+    /*unSubscribe(func) {
+        this.observers = this.observers.filter(f => f !== func);
+    }*/
+    
 
-  push(data) {
-    this.items.push(data);
-    this.observers.forEach((subscriber) => subscriber(this.items));
-  }
-  pop() {
-    this.items = this.items.pop();
-    this.observers.forEach((subscriber) => subscriber(this.items));
-  }
+    push(data) {
+        this.items.push(data);
+        this.observers.forEach((subscriber) => subscriber(this.items));
+    }
+    pop() {
+        this.items = this.items.pop();
+        this.observers.forEach((subscriber) => subscriber(this.items));
+    }
+    
+    // Good. Just an alternative
+    /*
+    push(data) {
+        this.items.push(data);
+        this.notify(this.items)
+    }
+    
+    pop() {
+        this.notify(this.items.pop())
+    }
+    
+    notify(data) {
+        this.observers.forEach((subscriber) => subscriber(data));
+    }
+    */
+    
 }
 
 
 const obs = new ObserverClass();
 
 obs.subscribe((text) => {
-  console.log(text, 'in subs');
+    console.log(text, 'in subs');
 });
 
 
