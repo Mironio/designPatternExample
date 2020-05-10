@@ -1,4 +1,4 @@
-//Swapnil_tripathi@epam.com
+//Swapnil_tripathi
 //Creational Design Pattern  
 
 // Factory Design
